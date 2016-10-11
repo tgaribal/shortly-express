@@ -4,8 +4,7 @@
   <ul>
     <li><a href='#' class='index'>All Links</a></li>
     <li><a href='#' class='create'>Shorten</a></li>
-    <li><a href='#' class='login'>Log In</a></li>
-    <li><a href='#' class='signup'>Sign Up</a></li>
+    <li><a href='/logout' class='logout'>Logout</a></li>
 
   </ul>
   </div>
@@ -29,47 +28,6 @@
   </form>
   <img class='spinner' src='/spiffygif_46x46.gif'>
   <div class='message'></div>
-</script>
-
-
-<script id='login' type='text/x-handlebars-template'>
-  <h2>Login</h2>
-  <form action="/login" method="post">
-      <div>
-        <label for="username">Username:</label>
-        <input id="username" type="text" name="username">
-      </div>
-      <div>
-        <label for="password">Password:</label>
-        <input id="password" type="password" name="password">
-      </div>
-      <div>
-        <input type="submit" value="Login">
-      </div>
-  </form>
-  <p>
-    <a href="/signup">Create an Account &rarr;</a>
-  <p>
-</script>
-
-<script id='signup' type='text/x-handlebars-template'>
-  <h2>Sign up</h2>
-  <form action="/signup" method="post">
-      <div>
-        <label for="username">Username:</label>
-        <input id="username" type="text" name="username">
-      </div>
-      <div>
-        <label for="password">Password:</label>
-        <input id="password" type="password" name="password">
-      </div>
-      <div>
-        <input type="submit" value="Sign up">
-      </div>
-  </form>
-  <p>
-    <a href="/login">Login to your account &rarr;</a>
-  <p>
 </script>
 
 <script>

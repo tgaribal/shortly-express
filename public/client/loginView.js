@@ -1,10 +1,10 @@
-Shortly.LoginView = Backbone.View.extend({
-  className: 'login',
+// Shortly.LoginView = Backbone.View.extend({
+//   className: 'login',
 
-  template: Templates['login'],
+//   template: Templates['login'],
 
-  render: function() {
-    this.$el.html(this.template());
-    return this;
-  }
-});
+//   render: function() {
+//     // this.$el.html();
+//     return this;
+//   }
+// });

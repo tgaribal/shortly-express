@@ -1,3 +1,3 @@
-Shortly.SignUp = Backbone.Model.extend({
-  urlRoot: '/signup'
-});
+// Shortly.SignUp = Backbone.Model.extend({
+//   urlRoot: '/signup'
+// });

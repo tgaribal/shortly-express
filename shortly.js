@@ -30,7 +30,6 @@ app.use(session({
 }));
 
 
-
 var restrict = function(req, res, next) {
   if (req.session.user) {
     next();
@@ -47,6 +46,7 @@ app.get('/', restrict, function(req, res) {
 
 app.get('/create', restrict,
 function(req, res) {
+  console.log('create', req.session);
   res.render('index');
 });
 
@@ -74,11 +74,12 @@ function(req, res) {
           console.log('Error reading URL heading: ', err);
           return res.sendStatus(404);
         }
-
+        console.log('within link create', req.session.user);
         Links.create({
           url: uri,
           title: title,
-          baseUrl: req.headers.origin
+          baseUrl: req.headers.origin,
+          userId: req.session.user.id
         })
         .then(function(newLink) {
           res.status(200).send(newLink);
@@ -106,32 +107,53 @@ app.post('/signup',
           password: password
         })
         .then(function (newUser) {
+          //start new session?
+          // req.session.regenerate(function() {
           req.session.user = newUser;
           res.redirect(301, '/');
+          // });
         });
       }
     });
   });
 
+app.get ('/logout', function (req, res) {
+  console.log('logout get request');
+  req.session.destroy();
+  console.log('req.session.user should be undefined after sess destroyed', req.session);
+  // req.session.user = undefined;
+  res.render('login');
+
+});
+
 app.get ('/login', function (req, res) {
+  console.log('login get request');
   res.render('login');
 });
 
 app.post('/login',
   function (req, res) {
+    console.log('login post request');
     var username = req.body.username;
     var password = req.body.password;
-    console.log('user:', username, '   ps:', password);
+    
     Users.fetch().then(function(users) {
       var userList = users.models;
       userList.forEach(function(user) {
         if (user.attributes.username === username && user.attributes.password === password) {
-          req.session.user = username;
+          //start new session?
+          // req.session.regenerate(function() {
+          // console.log('user in sess regenerate', user);
+          req.session.user = user;
           res.redirect(301, '/');
+          // });
         }
       });
-
-      res.redirect(301, '/login');
+      // console.log('after then', req.session.user);
+      if (req.session.user === undefined) {
+        // console.log('outside sess regenerate', req.session.user);
+        res.redirect(301, '/login');
+      }
     });
   });
 /************************************************************/
@@ -146,7 +168,7 @@ app.post('/login',
 // If the short-code doesn't exist, send the user to '/'
 /************************************************************/
 
-app.get('/*', function(req, res) {   //Causing infinite loop with initial pathway...
+app.get('/*', function(req, res) {   
   new Link({ code: req.params[0] }).fetch().then(function(link) {
     if (!link) {
       res.redirect('/');
