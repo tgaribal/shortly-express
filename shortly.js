@@ -3,6 +3,8 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var bcrypt = require('bcrypt-nodejs');
+var Promise = require('bluebird');
 
 
 var db = require('./app/config');
@@ -74,7 +76,6 @@ function(req, res) {
           console.log('Error reading URL heading: ', err);
           return res.sendStatus(404);
         }
-        console.log('within link create', req.session.user);
         Links.create({
           url: uri,
           title: title,
@@ -97,21 +98,26 @@ app.post('/signup',
   function (req, res) {
     var username = req.body.username;
     var password = req.body.password;
-    new User({username: username, password: password}).fetch().then(function (user) {
-      if (user) {
+
+    new User({username: username}).fetch().then(function (found) {
+      if (found) {
         res.redirect(301, '/login');
-        console.log('username already exists', user);
       } else {
-        Users.create({
-          username: username,
-          password: password
-        })
-        .then(function (newUser) {
-          //start new session?
-          // req.session.regenerate(function() {
-          req.session.user = newUser;
-          res.redirect(301, '/');
-          // });
+        var salt = bcrypt.genSaltSync(10);
+        bcrypt.hash(password, salt, null, function(err, hash) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log('username', username, 'password:', hash);
+            Users.create({
+              username: username,
+              password: hash
+            })
+            .then(function (newUser) {
+              req.session.user = newUser;
+              res.redirect(301, '/');
+            });
+          }
         });
       }
     });
@@ -120,11 +126,11 @@ app.post('/signup',
 app.get ('/logout', function (req, res) {
   console.log('logout get request');
   req.session.destroy();
-  console.log('req.session.user should be undefined after sess destroyed', req.session);
-  // req.session.user = undefined;
   res.render('login');
 
 });
+
+
 
 app.get ('/login', function (req, res) {
   console.log('login get request');
@@ -136,22 +142,21 @@ app.post('/login',
     console.log('login post request');
     var username = req.body.username;
     var password = req.body.password;
-    
-    Users.fetch().then(function(users) {
-      var userList = users.models;
-      userList.forEach(function(user) {
-        if (user.attributes.username === username && user.attributes.password === password) {
-          //start new session?
-          // req.session.regenerate(function() {
-          // console.log('user in sess regenerate', user);
-          req.session.user = user;
-          res.redirect(301, '/');
-          // });
-        }
-      });
-      // console.log('after then', req.session.user);
-      if (req.session.user === undefined) {
-        // console.log('outside sess regenerate', req.session.user);
+ 
+    new User({username: username}).fetch().then(function(found) {
+      if (found) {
+        bcrypt.compare(password, found.attributes.password, function (err, match) {
+          console.log('pass', password, 'hashed', found.attributes.password, 'res:', match);
+          if (err) {
+            console.log(err);
+          }
+          if (match) {
+            console.log('username/ passweord combo correct');
+            req.session.user = found;
+            res.redirect(301, '/');
+          }
+        });
+      } else {
         res.redirect(301, '/login');
       }
     });

@@ -13,11 +13,38 @@ var User = db.Model.extend({
   },
   initialize: function() {
     this.on('creating', function (model, attrs, options) {
-      // console.log('model', model);
-      // console.log('attr', attrs);
-      // console.log('options', options);
+      console.log('initialize model', model.get('password'));
+      // var salt = bcrypt.genSaltSync(10);
+
+      // bcrypt.hash(model.password, salt, null, function(err, hash) {
+      //   if (err) {
+      //     console.log(err);
+      //   } else {
+      //     console.log('hash from user model', hash);
+      //     model.set('password', hash);
+      //   }
+      // });
     });
   }
 });
 
 module.exports = User;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
